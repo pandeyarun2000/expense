@@ -1,0 +1,121 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Expense Data</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .left-column {
+            width: 50%;
+            background-color: rgba(3, 3, 3, 0.7);
+            color: #fff;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .right-column {
+            width: 50%;
+            width: 50%;
+  background-color: rgba(255, 255, 255, 0.7); /* Change the background color to white with 50% transparency */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 50px;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 36px;
+        }
+
+        p {
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .file-input {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0); /* Set the background color to fully transparent */
+            font-size: 16px;
+            margin-bottom: 20px;
+            width: 300px;
+        }
+
+        .file-input[type="submit"] {
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .file-input[type="submit"]:hover {
+            background-color: #3e8e41;
+        }
+
+        #video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-column">
+            <h1>Are you tired of categorizing your expense data?</h1>
+        </div>
+        <div class="right-column">
+            <video id="video-background" autoplay loop muted>
+                <source src="{% static 'NY.mp4' %}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <p>Select your Expense Data files by clicking on the "Choose Files" button below.</p>
+            <form method="post" enctype="multipart/form-data" class="upload-form">
+                {% csrf_token %}
+                <input type="file" name="expense_data" accept=".csv" multiple class="file-input">
+                <br>
+                <input type="submit" value="Upload" class="file-input">
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
+
+

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Categorized Expenses</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            max-width: 100%;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #333;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #fff;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #555;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #444;
+        }
+
+        .category-selector {
+            margin-bottom: 20px;
+        }
+
+        .category-label {
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .category-checkbox {
+            display: none;
+        }
+
+        .category-checkbox + label {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            margin-right: 10px;
+            color: #fff;
+        }
+
+        .category-checkbox + label:before {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #555;
+            border-radius: 50%;
+            margin-right: 5px;
+            background-color: transparent;
+            transition: background-color 0.3s ease;
+        }
+
+        .category-checkbox:checked + label:before {
+            background-color: #4CAF50;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <p><a href="{% url 'all_expenses' %}">View All Expenses</a></p>
+
+    <h1>Categorized Expenses</h1>
+
+
+     
+
+    <div class="category-selector">
+        <label class="category-label">Select Categories:</label>
+        {% for category, _ in categorized_expenses %}
+            <input class="category-checkbox" type="checkbox" id="{{ category }}" data-category="{{ category }}" data-total="{{ total_expense }}" checked>
+            <label for="{{ category }}">{{ category }}</label>
+        {% endfor %}
+    </div>
+
+    <table>
+        <tr>
+            <th>Expense Category</th>
+            <th>Total Expense</th>
+        </tr>
+        {% for category, total_expense in categorized_expenses %}
+            <tr class="category-row" data-category="{{ category }}">
+                <td>{{ category }}</td>
+                <td>${{ total_expense }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h1>Expense Chart</h1>
+
+    <canvas id="expenseChart"></canvas>
+
+
+
+
+    <script>
+        const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+        const categoryRows = document.querySelectorAll('.category-row');
+        const expenseChart = document.getElementById('expenseChart').getContext('2d');
+        let chart;
+
+        // Create initial chart
+        createChart();
+
+        categoryCheckboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                const category = this.getAttribute('data-category');
+                const categoryRow = document.querySelector(`.category-row[data-category="${category}"]`);
+                categoryRow.style.display = this.checked ? 'table-row' : 'none';
+                updateChart();
+            });
+        });
+
+        function createChart() {
+            const labels = [];
+            const data = [];
+
+            {% for category, total_expense in categorized_expenses %}
+                labels.push('{{ category }}');
+                data.push({{ total_expense }});
+            {% endfor %}
+
+            const chartData = {
+                labels: labels,
+                datasets: [{
+                    label: '',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const chartOptions = {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            };
+
+            chart = new Chart(expenseChart, {
+                type: 'bar',
+                data: chartData,
+                options: chartOptions
+            });
+        }
+
+        function updateChart() {
+            const activeCategories = Array.from(categoryCheckboxes).filter(checkbox => checkbox.checked);
+            const activeCategoryLabels = activeCategories.map(checkbox => checkbox.getAttribute('data-category'));
+            const activeCategoryData = activeCategories.map(checkbox => parseFloat(checkbox.getAttribute('data-total')));
+
+            const datasets = chart.data.datasets;
+            const newData = activeCategoryLabels.map((label, index) => {
+                const existingData = datasets.find(dataset => dataset.label === label);
+                if (existingData) {
+                    return {
+                        label: label,
+                        data: [activeCategoryData[index]],
+                        backgroundColor: existingData.backgroundColor,
+                        borderColor: existingData.borderColor,
+                        borderWidth: existingData.borderWidth
+                    };
+                }
+            });
+
+            chart.data.labels = activeCategoryLabels;
+            chart.data.datasets = newData;
+            chart.update();
+        }
+    </script>
+
+   
+
+
+
+</body>
+</html>
